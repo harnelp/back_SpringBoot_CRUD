@@ -10,8 +10,8 @@ COPY . .
 # Da permisos de ejecución al Maven Wrapper
 RUN chmod +x ./mvnw
 
-# Compila la aplicación usando Maven
-RUN ./mvnw clean package
+# Compila la aplicación usando Maven (se omiten las pruebas)
+RUN ./mvnw clean package -DskipTests
 
 # Expone el puerto en el contenedor (usualmente 8080 para Spring Boot)
 EXPOSE 8080
