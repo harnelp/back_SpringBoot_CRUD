@@ -1,41 +1,38 @@
 package crud.controller;
 
+import crud.assembler.PersonModelAssembler;
 import crud.model.Person;
 import crud.service.PersonService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * Controlador REST para gestionar las operaciones CRUD relacionadas con la entidad Person.
- * Este controlador expone endpoints para obtener, crear, actualizar y eliminar personas.
  */
 @RestController
 @RequestMapping("/api/persons")
 public class PersonController {
 
     private final PersonService personService;
-
-    // Logger para registrar las solicitudes y eventos importantes
+    private final PersonModelAssembler personModelAssembler;
     private static final Logger logger = LoggerFactory.getLogger(PersonController.class);
 
-    /**
-     * Constructor que inyecta el servicio de Person.
-     // @param personService El servicio que maneja la lógica de negocio relacionada con Person.
-     */
-    public PersonController(PersonService personService) {
+    public PersonController(PersonService personService, PersonModelAssembler personModelAssembler) {
         this.personService = personService;
+        this.personModelAssembler = personModelAssembler;
     }
 
     /**
-     * Endpoint para obtener todas las personas sin paginación.
-     // @return Una lista de todas las personas almacenadas en la base de datos.
+     * Obtener todas las personas sin paginación.
      */
     @GetMapping
     public List<Person> getAllPersons() {
@@ -44,58 +41,57 @@ public class PersonController {
     }
 
     /**
-     * Endpoint para obtener una lista paginada de personas.
-     // @param page Número de la página (por defecto 0).
-     // @param size Tamaño de la página (por defecto 10).
-     // @return Una página que contiene un subconjunto de personas.
+     * Obtener una lista paginada de personas.
      */
     @GetMapping("/paged")
-    public Page<Person> getAllPersonsPaged(
+    public ResponseEntity<PagedModel<EntityModel<Person>>> getAllPersonsPaged(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(defaultValue = "10") int size) {
+
         logger.info("Solicitud recibida para obtener personas con paginación (página: {}, tamaño: {})", page, size);
-        return personService.getAllPersons(PageRequest.of(page, size));
+
+        Page<Person> personPage = personService.getAllPersons(PageRequest.of(page, size));
+        PagedModel<EntityModel<Person>> pagedModel = personModelAssembler.toPagedModel(personPage);
+
+        return ResponseEntity.ok(pagedModel);
     }
 
     /**
-     * Endpoint para obtener una persona específica por su ID.
-     // @param id El ID de la persona a buscar.
-     // @return Un ResponseEntity que contiene la persona si existe, o un estado 404 si no se encuentra.
+     * Obtener una persona por ID.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Person> getPersonById(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<Person>> getPersonById(@PathVariable Long id) {
         logger.info("Solicitud recibida para obtener la persona con ID: {}", id);
+
         Person person = personService.getPersonById(id);
-        return person != null ? ResponseEntity.ok(person) : ResponseEntity.notFound().build();
+        if (person == null) {
+            logger.warn("Persona con ID: {} no encontrada", id);
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(personModelAssembler.toModel(person));
     }
 
     /**
-     * Endpoint para crear una nueva persona.
-     // @param person Los datos de la nueva persona.
-     // @return La persona creada.
+     * Crear una nueva persona.
      */
     @PostMapping
     public ResponseEntity<?> createPerson(@RequestBody @Valid Person person) {
         try {
             logger.info("Solicitud recibida para crear una nueva persona: {}", person.getName());
             Person savedPerson = personService.savePerson(person);
-            return ResponseEntity.ok(savedPerson);
+            return ResponseEntity.ok(personModelAssembler.toModel(savedPerson));
         } catch (Exception e) {
             logger.error("Error al crear una nueva persona", e);
             return ResponseEntity.status(500).body("{\"error\": \"Ocurrió un error al guardar la persona.\"}");
         }
     }
 
-
     /**
-     * Endpoint para actualizar los datos de una persona existente.
-     // @param id El ID de la persona a actualizar.
-     // @param personDetails Los nuevos datos de la persona.
-     // @return Un ResponseEntity que contiene la persona actualizada si se encuentra, o un estado 404 si no existe.
+     * Actualizar datos de una persona existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Person> updatePerson(@PathVariable Long id, @Valid @RequestBody Person personDetails) {
+    public ResponseEntity<EntityModel<Person>> updatePerson(@PathVariable Long id, @Valid @RequestBody Person personDetails) {
         logger.info("Solicitud recibida para actualizar la persona con ID: {}", id);
         Person person = personService.getPersonById(id);
         if (person == null) {
@@ -106,14 +102,13 @@ public class PersonController {
         person.setPhoneNumber(personDetails.getPhoneNumber());
         person.setEmailAddress(personDetails.getEmailAddress());
         person.setAddress(personDetails.getAddress());
-        logger.info("Persona con ID: {} actualizada exitosamente", id);
-        return ResponseEntity.ok(personService.savePerson(person));
+
+        Person updatedPerson = personService.savePerson(person);
+        return ResponseEntity.ok(personModelAssembler.toModel(updatedPerson));
     }
 
     /**
-     * Endpoint para eliminar una persona existente por su ID.
-     // @param id El ID de la persona a eliminar.
-     // @return Un ResponseEntity con un estado 204 (NO_CONTENT) si se elimina correctamente.
+     * Eliminar una persona existente por ID.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerson(@PathVariable Long id) {

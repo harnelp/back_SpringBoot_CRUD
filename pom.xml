@@ -72,6 +72,16 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>8.0.0.Final</version>
 		</dependency>
+
+				<!--
+			Dependencia para implementar HATEOAS (Hypermedia as the Engine of Application State).
+			Permite agregar enlaces (links) a las respuestas JSON del API, enriqueciendo los datos y
+			permitiendo que los clientes naveguen dinámicamente por los recursos del backend.
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
