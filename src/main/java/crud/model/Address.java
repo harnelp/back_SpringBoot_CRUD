@@ -2,7 +2,6 @@ package crud.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
@@ -10,8 +9,7 @@ import java.util.Objects;
 /**
  * Clase que representa la entidad Address.
  * Esta entidad está mapeada a una tabla en la base de datos mediante JPA.
- * Incluye validaciones para los campos como restricciones de longitud,
- * formatos específicos y valores obligatorios.
+ * Incluye validaciones para los campos como restricciones de longitud y valores obligatorios.
  */
 @Entity
 public class Address {
@@ -42,29 +40,6 @@ public class Address {
     @Size(max = 50, message = "La ciudad no puede tener más de 50 caracteres")
     private String city;
 
-    /**
-     * Estado o provincia de la dirección.
-     * - No puede estar vacío.
-     * - Tiene un límite máximo de 50 caracteres.
-     */
-    @NotBlank(message = "El estado no puede estar vacío")
-    @Size(max = 50, message = "El estado no puede tener más de 50 caracteres")
-    private String state;
-
-    /**
-     * Código postal de la dirección.
-     * - Debe contener exactamente 5 dígitos.
-     */
-    @Pattern(regexp = "\\d{5}", message = "El código postal debe contener 5 dígitos")
-    private String postalCode;
-
-    /**
-     * País de la dirección.
-     * - No puede estar vacío.
-     */
-    @NotBlank(message = "El país no puede estar vacío")
-    private String country;
-
     // Getters, setters y métodos adicionales
     public Long getId() {
         return id;
@@ -90,30 +65,6 @@ public class Address {
         this.city = city;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     // Métodos equals y hashCode para comparar objetos Address
     @Override
     public boolean equals(Object o) {
@@ -122,14 +73,11 @@ public class Address {
         Address address = (Address) o;
         return Objects.equals(id, address.id) &&
                 Objects.equals(street, address.street) &&
-                Objects.equals(city, address.city) &&
-                Objects.equals(state, address.state) &&
-                Objects.equals(postalCode, address.postalCode) &&
-                Objects.equals(country, address.country);
+                Objects.equals(city, address.city);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, street, city, state, postalCode, country);
+        return Objects.hash(id, street, city);
     }
 }
