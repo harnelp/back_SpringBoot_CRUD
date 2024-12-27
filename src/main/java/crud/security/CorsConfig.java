@@ -24,7 +24,7 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 // Configura las rutas permitidas para solicitudes CORS
                 registry.addMapping("/**")// Permite todas las rutas del backend
-                        .allowedOrigins("http://localhost:5500", // Dominio del frontend local
+                        .allowedOrigins("https://front-crud-spring.netlify.app", // Dominio del frontend local
                                 "http://127.0.0.1:5500") // Dirección alternativa del frontend
                         .allowedMethods("GET", "POST", "PUT", "DELETE") // Métodos HTTP permitidos
                         .allowedHeaders("*");// Permite todos los encabezados
