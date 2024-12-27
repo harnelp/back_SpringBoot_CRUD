@@ -23,7 +23,7 @@ public class ValidationExceptionHandler {
      * fallan al procesar los datos enviados al backend.
      // @param ex La excepción MethodArgumentNotValidException capturada.
      // @return Un ResponseEntity que contiene un mapa de errores (campo y mensaje asociado)
-     //         y un código de estado HTTP 400 (BAD_REQUEST).
+     //y un código de estado HTTP 400 (BAD_REQUEST).
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

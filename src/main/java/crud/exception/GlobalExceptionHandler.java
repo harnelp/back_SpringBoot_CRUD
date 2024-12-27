@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Clase que maneja excepciones globales en la aplicación.
  // Utiliza @RestControllerAdvice para interceptar excepciones lanzadas en los controladores
@@ -21,9 +24,10 @@ public class GlobalExceptionHandler {
      // @return Un ResponseEntity con el mensaje de error y el estado HTTP 404 (NOT_FOUND).
      */
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
-        // Devuelve el mensaje de error específico y el código de estado HTTP 404
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<Map<String, String>> handleEntityNotFoundException(EntityNotFoundException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -33,8 +37,10 @@ public class GlobalExceptionHandler {
      // @return Un ResponseEntity con un mensaje genérico de error y el estado HTTP 500 (INTERNAL_SERVER_ERROR).
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGenericException(Exception ex) {
-        // Devuelve un mensaje genérico para errores no controlados
-        return new ResponseEntity<>("Ocurrió un error interno", HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Ocurrió un error interno");
+        errorResponse.put("details", ex.getMessage()); // Opcional: detalles adicionales del error
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -76,10 +76,17 @@ public class PersonController {
      // @return La persona creada.
      */
     @PostMapping
-    public Person createPerson(@RequestBody Person person) {
-        logger.info("Solicitud recibida para crear una nueva persona: {}", person.getName());
-        return personService.savePerson(person);
+    public ResponseEntity<?> createPerson(@RequestBody @Valid Person person) {
+        try {
+            logger.info("Solicitud recibida para crear una nueva persona: {}", person.getName());
+            Person savedPerson = personService.savePerson(person);
+            return ResponseEntity.ok(savedPerson);
+        } catch (Exception e) {
+            logger.error("Error al crear una nueva persona", e);
+            return ResponseEntity.status(500).body("{\"error\": \"Ocurrió un error al guardar la persona.\"}");
+        }
     }
+
 
     /**
      * Endpoint para actualizar los datos de una persona existente.
@@ -110,7 +117,7 @@ public class PersonController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerson(@PathVariable Long id) {
-        logger.info("olicitud recibida para eliminar la persona con ID: {}", id);
+        logger.info("Solicitud recibida para eliminar la persona con ID: {}", id);
         personService.deletePerson(id);
         logger.info("Persona con ID: {} eliminada exitosamente", id);
         return ResponseEntity.noContent().build();
